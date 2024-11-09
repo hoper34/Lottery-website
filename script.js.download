@@ -1,0 +1,101 @@
+let users = {};
+let winningNumbers = [];
+const ticketPrice = 1000; // Price per ticket in Khmer Riel
+
+function registerUser() {
+    const username = document.getElementById('username').value;
+    if (!username) {
+        alert("សូមបញ្ចូលឈ្មោះអ្នកប្រើ។");
+        return;
+    }
+    if (!users[username]) {
+        users[username] = { balance: 0, tickets: [] };
+        document.getElementById('result').innerText = `ចុះឈ្មោះ ${username} ជោគជ័យ!`;
+    } else {
+        alert("ឈ្មោះអ្នកប្រើរួចហើយ។");
+    }
+    document.getElementById('username').value = '';
+}
+
+function addFunds() {
+    const username = document.getElementById('username').value;
+    const amount = parseInt(document.getElementById('funds').value, 10);
+    if (!users[username]) {
+        alert("ឈួរបញ្ញារ៉ូ្ន ជាអ្នកប្រើ។");
+        return;
+    }
+    if (amount > 0) {
+        users[username].balance += amount;
+        document.getElementById('result').innerText = `បន្ថែម ${amount} រៀល ទៅគណនី ${username}។`;
+    } else {
+        alert("សូមបញ្ចូលចំនួនប្រាក់ដែលត្រឹមត្រូវ។");
+    }
+    document.getElementById('funds').value = '';
+}
+
+function purchaseTicket() {
+    const username = document.getElementById('username').value;
+    const ticketNumbers = document.getElementById('ticketNumbers').value.split(',').map(Number);
+    
+    if (!users[username]) {
+        alert("។");
+        return;
+    }
+    if (ticketNumbers.length !== 5 || ticketNumbers.some(num => num < 1 || num > 49)) {
+        alert("សូមបញ្ចូលលេខដែលត្រឹមត្រូវ (1-49) និងចំនួន 7 លេខ។");
+        return;
+    }
+    if (users[username].balance < ticketPrice) {
+        alert("មានប្រាក់គ្រប់គ្រាន់។");
+        return;
+    }
+    
+    users[username].tickets.push(ticketNumbers);
+    users[username].balance -= ticketPrice;
+    document.getElementById('result').innerText = `${username} បានទិញសំបុត្រលេខ: ${ticketNumbers.join(', ')}`;
+    document.getElementById('ticketNumbers').value = '';
+}
+
+function drawWinningNumbers() {
+    winningNumbers = [];
+    while (winningNumbers.length < 5) {
+        const num = Math.floor(Math.random() * 49) + 1;
+        if (!winningNumbers.includes(num)) {
+            winningNumbers.push(num);
+        }
+    }
+    document.getElementById('result').innerText = `លេខឈ្នះបានគូស: ${winningNumbers.join(', ')}`;
+}
+
+function checkWinners() {
+    let winners = [];
+    for (const [user, info] of Object.entries(users)) {
+        for (const ticket of info.tickets) {
+            const matches = ticket.filter(num => winningNumbers.includes(num));
+            if (matches.length >= 3) { // Win if matches 3 or more
+                const payout = ticketPrice * (matches.length - 2) * 5; // Example payout calculation
+                info.balance += payout;
+                winners.push({ user, matches, payout });
+            }
+        }
+    }
+    
+    if (winners.length > 0) {
+        let resultText = "អ្នកឈ្នះ:\n";
+        winners.forEach(winner => {
+            resultText += `${winner.user} មាន ${winner.matches.join(', ')} និងឈ្នះ ${winner.payout} រៀល\n`;
+        });
+        document.getElementById('result').innerText = resultText;
+    } else {
+        document.getElementById('result').innerText = "អ្នកឈ្នះឈ្មោះ ឈួរបញ្ញារ៉ូ។";
+    }
+}
+
+function showBalance() {
+    const username = document.getElementById('username').value;
+    if (users[username]) {
+        document.getElementById('result').innerText = `${username} មានប្រាក់នៅក្នុងគណនី: ${users[username].balance} រៀល`;
+    } else {
+        alert("23456រៀល");
+    }
+}
